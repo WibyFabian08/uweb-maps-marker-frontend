@@ -1,16 +1,17 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import Geocoder from "react-map-gl-geocoder";
+
+import { createMarker, getMarkers } from "./api/markerApi";
+
 import "react-map-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
-import { format } from "timeago.js";
-
 import { Room } from "@material-ui/icons";
-import Rating from "@material-ui/lab/Rating";
 
 import "./assets/css/style.css";
-import { useEffect } from "react";
-import axios from "axios";
+import CardInfo from "./components/CardInfo";
+import InputText from "./elements/InputText";
+import InputRating from "./elements/SelectInput";
 
 function App() {
   const mapRef = useRef();
@@ -68,7 +69,7 @@ function App() {
     });
   };
 
-  const createMarker = (e) => {
+  const handleCreateMarker = (e) => {
     e.preventDefault();
     const data = {
       username: activeUser,
@@ -79,40 +80,11 @@ function App() {
       rating: body.rating,
     };
 
-    axios
-      .post("http://localhost:3000/api/markers/create", data)
-      .then((res) => {
-        console.log(res.data);
-        setNewMarker(null);
-        setBody({
-          ...body,
-          title: "",
-          desc: "",
-          rating: "",
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        setNewMarker(null);
-        setBody({
-          ...body,
-          title: "",
-          desc: "",
-          rating: "",
-        });
-      });
+    createMarker(setNewMarker, setBody, data, body, setMarkers);
   };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/markers")
-      .then((res) => {
-        console.log(res.data);
-        setMarkers(res.data.markers);
-      })
-      .catch((err) => {
-        console.log(err?.response?.data?.message);
-      });
+    getMarkers(setMarkers);
   }, []);
 
   return (
@@ -139,9 +111,8 @@ function App() {
         {markers &&
           markers.map((marker, index) => {
             return (
-              <>
+              <div key={index}>
                 <Marker
-                  key={index}
                   latitude={marker?.lat}
                   longitude={marker?.long}
                   offsetLeft={-2 * viewport.zoom}
@@ -168,50 +139,10 @@ function App() {
                     onClose={() => setCurrentMarkerId(null)}
                     anchor="left"
                   >
-                    <div className="flex flex-col px-5">
-                      <div className="flex flex-col mb-3">
-                        <label
-                          className="mb-1 text-sm"
-                          style={{ color: "tomato" }}
-                        >
-                          Title
-                        </label>
-                        <h2>{marker?.title}</h2>
-                      </div>
-                      <div className="flex flex-col mb-3">
-                        <label
-                          className="mb-1 text-sm"
-                          style={{ color: "tomato" }}
-                        >
-                          Description
-                        </label>
-                        <h2>{marker?.desc}</h2>
-                      </div>
-                      <div className="flex flex-col mb-3">
-                        <label
-                          className="mb-1 text-sm"
-                          style={{ color: "tomato" }}
-                        >
-                          Created By:
-                        </label>
-                        <h2>{marker?.username}</h2>
-                        <p className="text-xs" style={{ color: "tomato" }}>
-                          {format(marker.createdAt)}
-                        </p>
-                      </div>
-                      <div className="flex flex-col mb-3">
-                        <label className="text-sm" style={{ color: "tomato" }}>
-                          Rating
-                        </label>
-                        <Rating
-                          name="simple-controlled"
-                          value={marker?.rating}
-                        />
-                      </div>
-                    </div>
+                    <CardInfo marker={marker}></CardInfo>
                   </Popup>
                 )}
-              </>
+              </div>
             );
           })}
         {newMarker && (
@@ -238,38 +169,25 @@ function App() {
               onClose={() => setNewMarker(null)}
               anchor="left"
             >
-              <form onSubmit={(e) => createMarker(e)}>
+              <form method="POST" onSubmit={(e) => handleCreateMarker(e)}>
                 <div className="flex flex-col">
-                  <input
-                    type="text"
-                    name="title"
+                  <InputText
                     value={body.title}
+                    name="title"
+                    placeholder="Title"
                     onChange={(e) => handleChange(e)}
-                    placeholder="title"
-                    className="px-4 py-2 mb-3 border border-gray-300 rounded-lg borer-solid focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    name="desc"
+                  ></InputText>
+                  <InputText
                     value={body.desc}
+                    name="desc"
+                    placeholder="Desc"
                     onChange={(e) => handleChange(e)}
-                    placeholder="desc"
-                    className="px-4 py-2 mb-3 border border-gray-300 rounded-lg borer-solid focus:outline-none"
-                  />
-                  <select
+                  ></InputText>
+                  <InputRating
                     name="rating"
                     value={body.rating}
                     onChange={(e) => handleChange(e)}
-                    name="rating"
-                    className="px-4 py-2 mb-3 border border-gray-300 rounded-lg borer-solid focus:outline-none"
-                  >
-                    <option value="">Rating</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                  </select>
+                  ></InputRating>
                   <button
                     type="submit"
                     className="py-2 text-white transition-all duration-300 bg-indigo-700 rounded-lg hover:bg-indigo-600"
