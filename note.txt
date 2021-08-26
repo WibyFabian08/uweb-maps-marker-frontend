@@ -1,0 +1,20 @@
+1. maps menggunakan mapbox
+    mapbox.com (gratis)
+    buat akun untuk get token
+    REACT_APP (awal nama di env)
+
+2. react-map-gl
+    install seperti biasa
+    masukan mapboxApiAccessToken yang tadi dari mapbox
+    ubah width dan height jadi 100%
+
+    cari marker di docimentasi
+    simpan di children map
+
+    ubah theme maps di mapbox gallery
+    di account pilih design 
+    copy link dan paste di mapStyle={link}
+
+    tambah popup unutk detaol informasi marker
+
+3. install material ui (icons, core)
