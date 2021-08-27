@@ -22,7 +22,7 @@ const CardInfo = ({marker}) => {
           Created By:
         </label>
         <h2>{marker?.username}</h2>
-        <p className="text-xs" style={{ color: "tomato" }}>
+        <p className="text-xs">
           {format(marker.createdAt)}
         </p>
       </div>
