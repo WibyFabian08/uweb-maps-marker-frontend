@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import ReactMapGL, { Marker, Popup } from "react-map-gl";
+import ReactMapGL, { Marker, Popup, GeolocateControl  } from "react-map-gl";
 import Geocoder from "react-map-gl-geocoder";
 import Swal from "sweetalert2";
 
@@ -15,7 +15,6 @@ import InputText from "./elements/InputText";
 import InputRating from "./elements/SelectInput";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
-import axios from "axios";
 import { login, register } from "./api/authApi";
 
 function App() {
@@ -24,6 +23,12 @@ function App() {
     (newViewport) => setViewport(newViewport),
     []
   );
+
+  const geolocateStyle = {
+    float: 'left',
+    margin: '50px',
+    padding: '10px'
+  };
 
   const handleGeocoderViewportChange = useCallback(
     (newViewport) => {
@@ -179,19 +184,25 @@ function App() {
         height="100%"
         onViewportChange={(nextViewport) => setViewport(nextViewport)}
         mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_KEY}
-        mapStyle="mapbox://styles/safak/cknndpyfq268f17p53nmpwira"
-        transitionDuration={200}
+        // mapStyle="mapbox://styles/safak/cknndpyfq268f17p53nmpwira"
+        mapStyle='mapbox://styles/mapbox/streets-v11'
+        transitionDuration={100}
         onDblClick={(e) => {
           addMarker(e);
         }}
       >
+        <GeolocateControl
+          style={geolocateStyle}
+          positionOptions={{enableHighAccuracy: true}}
+          trackUserLocation={true}
+         />
         <Geocoder
           mapRef={mapRef}
           onViewportChange={handleGeocoderViewportChange}
           mapboxApiAccessToken={process.env.REACT_APP_MAPBOX_KEY}
-          position="top-left"
+          position="top-right"
         />
-        <div className="absolute top-0 right-0 p-5">
+        <div className="absolute bottom-0 right-0 p-5">
           <div className="flex items-center">
             {activeUser === null ? (
               <>
